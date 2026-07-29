@@ -1,13 +1,23 @@
+import sys
+import os
+
+# Go up two directories to reach the project root
+project_root = os.path.abspath(os.path.join(os.getcwd(), '../..'))
+
+if project_root not in sys.path:
+    sys.path.append(project_root)
+
 # Import libraries
 import urllib.request
 import shutil
-import os
 from datetime import date, datetime, timezone
 from dateutil.relativedelta import relativedelta
+from modules.utils.date_utils import get_target_yyyymm
+from modules.data_loader.file_downloader import download_file
+
 
 # Obtains the year-month for 2 months prior to the current month in yyyy-MM format
-two_months_ago = date.today() - relativedelta(months=2)
-formatted_date = two_months_ago.strftime('%Y-%m')
+formatted_date = get_target_yyyymm(2)
 
 # Define the local directory for this date's data
 dir_path = f"/Volumes/nyctaxi/00_landing/data_sources/nyctaxi_yellow/{formatted_date}"
@@ -28,15 +38,8 @@ except:
         # Construct the download URL for the required parquet file
         url =f'https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_{formatted_date}.parquet'
 
-        # Open a connection and stream the remote file
-        response = urllib.request.urlopen(url)
-        
-        # Create the directory for this date's data
-        os.makedirs(dir_path, exist_ok=True)
-
-        # Save the downloaded file to the local path
-        with open(local_path, 'wb') as f:
-            shutil.copyfileobj(response,f)
+        # Download the file from the URL and save it to the specified local path
+        download_file(url, dir_path, local_path)
 
         # Set continue_downstream to yes if the file was downloaded successfully
         dbutils.jobs.taskValues.set("continue_downstream", "yes")
