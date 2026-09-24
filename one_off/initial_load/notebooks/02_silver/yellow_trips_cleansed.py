@@ -7,7 +7,7 @@ df = spark.read.table("nyctaxi.01_bronze.yellow_trips_raw")
 
 # COMMAND ----------
 
-# Check for data outliers, only 2024 and 2025 are valid years
+# Check for data outliers, only 2026 are valid years
 
 from pyspark.sql.functions import max, min
 
@@ -16,7 +16,7 @@ df.agg(max("tpep_pickup_datetime"), min("tpep_pickup_datetime")).display()
 
 # COMMAND ----------
 
-# Filter for valid years only (2024 & 2025)
+# Filter for valid years only (2026)
 df = df.\
     filter((df['tpep_pickup_datetime'] >= '2026-01-01') & (df['tpep_pickup_datetime'] <= '2026-04-30'))
 
